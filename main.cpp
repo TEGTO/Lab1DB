@@ -2,7 +2,7 @@
 #pragma warning(disable : 4996)
 
 void commands() {
-    printf("Choose what you want:\n");
+    printf("\nChoose what you want:\n");
     printf("[01] get-m\n"
         "[02] get-s\n"
         "[03] del-m\n"
@@ -46,6 +46,7 @@ void menu() {
             break;
         case 6:
             sUpdate();
+            break;
         case 7:
             insertM();
             break;

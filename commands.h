@@ -14,13 +14,18 @@ struct Office {
     char department[SIZE];
     char director[SIZE];
     char project[SIZE];
+    int departmentSize = 255;
+    int employees_id[SIZE]{};
+    int currentCountOfEmployees = 0;
     bool isDeleted = false;
 };
 
 struct Employee {
     int officeID;
+    int id;
     char name[SIZE];
     char speciality[SIZE];
+    bool isDeleted = false;
 };
 
 int getM();
