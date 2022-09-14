@@ -60,10 +60,10 @@ void menu() {
             countS();
             break;
         case 11:
-            printM();
+            printAllMasters();
             break;
         case 12:
-            printS();
+            printAllSlaves();
             break;
         case 13:
             check != check;

@@ -44,18 +44,16 @@ int getS() {
         perror("Error. Problems with opening the file");
         return 1;
     }
-    printM();
+    printAllMasters();
     printf("Enter the Office Id: ");
     scanf("%d", &id);
     printf("%s", "------------------------\n");
     fseek(offices, sizeof(struct Office) * (id - 1), SEEK_SET);
     fread(&office, sizeof(struct Office), 1, offices);
-   
-      
     for (int i = 0; i < office.currentCountOfEmployees; i++)
     {
        
-        
+    
             fseek(employees, sizeof(struct Employee) * (office.employees_id[i] - 1), SEEK_SET);
             fread(&employee, sizeof(struct Employee), 1, employees);
             if (!employee.isDeleted&& employee.officeID == office.id)
@@ -158,7 +156,7 @@ int insertM() {
                 fread(&id, sizeof(int), 1, delFile);
               
             }
-            printf("%d", id);
+         
             office.id = id;
             office.isDeleted = false;
            
@@ -230,7 +228,7 @@ int insertS() {
     printf("Enter Employee Speciality: ");
     scanf("%s", employee.speciality);
     printf("\n");
-   
+    employee.isDeleted = false;
     fseek(offices, officeSize*(employee.officeID-1), SEEK_SET);
     fread(&office, officeSize, 1, offices);
     for (int i = 0; i < office.departmentSize; i++)
@@ -260,7 +258,7 @@ int insertS() {
   
 }
 
-int printM() { 
+int printAllMasters() { 
     FILE* file;
     struct Office office;
 
@@ -287,7 +285,7 @@ int printM() {
     return 0;
 }
 
-int printS() 
+int printAllSlaves() 
 {
     FILE* file;
     struct Employee employee;
@@ -415,16 +413,16 @@ int deleteMasterByID(int id)
 
 int deleteSlaveByID(int id) 
 { 
-    FILE* mainFile;
+    FILE* employeesFile;
     Employee employee;
-    if ((mainFile = fopen(EMPLOYEE_PATH, "r+b")) == NULL)
+    if ((employeesFile = fopen(EMPLOYEE_PATH, "r+b")) == NULL)
     {
         perror("Error. Problems with opening the file\n");
         return 1;
     }
-    fseek(mainFile, sizeof(struct Employee) * (id - 1), SEEK_SET);
-    fread(&employee, sizeof(struct Employee), 1, mainFile);
-    int employeeSize = sizeof(Employee);
+    fseek(employeesFile, sizeof(struct Employee) * (id - 1), SEEK_SET);
+    fread(&employee, sizeof(struct Employee), 1, employeesFile);
+   
   
     if (employee.id == id)
     {
@@ -432,16 +430,16 @@ int deleteSlaveByID(int id)
         {
              printf("Employee with this id is not founded\n");
         }
-        fseek(mainFile, -employeeSize, SEEK_CUR);
+        fseek(employeesFile, sizeof(struct Employee) * (id - 1), SEEK_SET);
 
         employee.isDeleted = true;
-        fwrite(&employee, sizeof(struct Employee), 1, mainFile);
+        fwrite(&employee, sizeof(struct Employee), 1, employeesFile);
     }
     else
     {
         printf("Employee with this id is not founded\n");
     }
-    fclose(mainFile);
+    fclose(employeesFile);
   
 }
 
@@ -501,12 +499,12 @@ int slaveUpdateByID(int id) {
 
     int property;
     int isFound=false;
-    FILE* mainFile;
+    FILE* employeesFile;
     Employee employee;
     FILE* offices;
     Office office;
-    double officeSize = sizeof(Office);
-    if ((mainFile = fopen(EMPLOYEE_PATH, "r+b")) == NULL)
+   
+    if ((employeesFile = fopen(EMPLOYEE_PATH, "r+b")) == NULL)
     {
         perror("Error. Problems with opening the file");
         return 1;
@@ -516,8 +514,8 @@ int slaveUpdateByID(int id) {
         perror("Error. Problems with opening the file");
         return 1;
     }
-    fseek(mainFile, sizeof(struct Employee) * (id - 1), SEEK_SET);
-    fread(&employee, sizeof(struct Employee), 1, mainFile);
+    fseek(employeesFile, sizeof(struct Employee) * (id - 1), SEEK_SET);
+    fread(&employee, sizeof(struct Employee), 1, employeesFile);
 
         if (employee.id == id &&!employee.isDeleted) 
         {
@@ -544,18 +542,19 @@ int slaveUpdateByID(int id) {
         {   
             if (office.employees_id[i]==employee.id)
             {
-                office.currentCountOfEmployees--;
+               
+                break;
             }
 
-            if (office.employees_id[i] == 0)
+            if (office.employees_id[i] == 0 )
             {
                 office.employees_id[i] = employee.id;
                 office.currentCountOfEmployees++;
                 if (office.currentCountOfEmployees < office.departmentSize)
                 {
-                    printf("%d", office.departmentSize);
-                    fseek(offices, officeSize * (employee.officeID - 1), SEEK_SET);
-                    fwrite(&office, officeSize, 1, offices);
+                  
+                    fseek(offices, sizeof(struct Office) * (employee.officeID - 1), SEEK_SET);
+                    fwrite(&office, sizeof(struct Office), 1, offices);
                   
                 }
                 else
@@ -566,8 +565,8 @@ int slaveUpdateByID(int id) {
                 break;
             }
         }
-        fseek(mainFile, sizeof(struct Employee) * (employee.id - 1), SEEK_SET);
-        fwrite(&employee, sizeof(struct Employee), 1, mainFile);
+        fseek(employeesFile, sizeof(struct Employee) * (employee.id - 1), SEEK_SET);
+        fwrite(&employee, sizeof(struct Employee), 1, employeesFile);
         break;
     case 2:
         printf("Enter the new Name: ");
@@ -584,9 +583,9 @@ int slaveUpdateByID(int id) {
     }
     printf("\n");
     double sizeStudent = sizeof(Employee);
-    fseek(mainFile, -sizeStudent, SEEK_CUR);
-    fwrite(&employee, sizeof(struct Employee), 1, mainFile);
-    fclose(mainFile);
+    fseek(employeesFile, -sizeStudent, SEEK_CUR);
+    fwrite(&employee, sizeof(struct Employee), 1, employeesFile);
+    fclose(employeesFile);
     fclose(offices);
     return 0;
 }

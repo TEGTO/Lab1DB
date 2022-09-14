@@ -44,9 +44,9 @@ int insertM();
 
 int insertS();
 
-int printM();
+int printAllMasters();
 
-int printS();
+int printAllSlaves();
 
 int countM();
 
