@@ -6,8 +6,8 @@
 #define SIZE (255)
 #define EMPLOYEE_PATH ("employee")
 #define EMPLOYEE_DELETED ("employee_deleted")
-#define OFFICE_PATH ("office")
-#define OFFICE_DELETED ("office_deleted")
+#define DEPARTMENT_PATH ("departments")
+#define DEPARTMENTS_DELETED ("departments_deleted")
 
 struct Department {
     int id;

@@ -6,7 +6,7 @@ int getM() {
     struct Department department;
     int id;
 
-    if ((fp = fopen(OFFICE_PATH, "rb")) == NULL) {
+    if ((fp = fopen(DEPARTMENT_PATH, "rb")) == NULL) {
         perror("Error. Problems with opening the file");
         return 1;
     }
@@ -41,25 +41,27 @@ int getS() {
         perror("Error. Problems with opening the file");
         return 1;
     }
-    if ((departments = fopen(OFFICE_PATH, "rb")) == NULL) {
+    if ((departments = fopen(DEPARTMENT_PATH, "rb")) == NULL) {
         perror("Error. Problems with opening the file");
         return 1;
     }
     printAllMasters();
     printf("Enter the Department Id: ");
     scanf("%d", &id);
-    printf("%s", "------------Department Employees------------\n");
+    printf("%s", "\n------------Department Employees------------\n");
     fseek(departments, sizeof(struct Department) * (id - 1), SEEK_SET);
     fread(&department, sizeof(struct Department), 1, departments);
-    for (int i = 0; i < department.currentCountOfEmployees; i++)
+    int checkID = 0;
+    for (int i = 0; i <= department.currentCountOfEmployees; i++)
     {
        
     
             fseek(employees, sizeof(struct Employee) * (department.employeesID[i] - 1), SEEK_SET);
             fread(&employee, sizeof(struct Employee), 1, employees);
-            if (!employee.isDeleted&& employee.departmentID == department.id)
+            if (!employee.isDeleted&& employee.departmentID == department.id && checkID != employee.id)
             {
-                printf("ID :           %d\nDepartmentID : %d\nName:          %s\nSpeciality:    %s\n",employee.id,employee.departmentID, employee.name, employee.speciality);
+                checkID = department.employeesID[i];
+                printf("ID           : %d\nDepartmentID : %d\nName         : %s\nSpeciality   : %s\n",employee.id,employee.departmentID, employee.name, employee.speciality);
                 printf("%s", "--------------------------------------------\n");
             }
             
@@ -122,11 +124,11 @@ int insertM() {
     int id=-1;
     double intSize = sizeof(int);
    
-    if ((departmentsFile = fopen(OFFICE_PATH, "a+b")) == NULL) {
+    if ((departmentsFile = fopen(DEPARTMENT_PATH, "a+b")) == NULL) {
         perror("Error occured while opening file");
         return 1;
     }
-    if ((departmentsDelFile = fopen(OFFICE_DELETED, "a+b")) == NULL)
+    if ((departmentsDelFile = fopen(DEPARTMENTS_DELETED, "a+b")) == NULL)
     {
         perror("Error occured while opening file");
         return 1;
@@ -142,13 +144,13 @@ int insertM() {
     if (id ==-1)
     {
        
-        departmentsDelFile = fopen(OFFICE_DELETED, "r+b");
-        remove(OFFICE_DELETED);
+        departmentsDelFile = fopen(DEPARTMENTS_DELETED, "r+b");
+        remove(DEPARTMENTS_DELETED);
     }
     if (id!=-1) 
     {
-            departmentsFile = fopen(OFFICE_PATH, "r+b");
-            departmentsDelFile = fopen(OFFICE_DELETED, "r+b");
+            departmentsFile = fopen(DEPARTMENT_PATH, "r+b");
+            departmentsDelFile = fopen(DEPARTMENTS_DELETED, "r+b");
             fseek(departmentsDelFile, -intSize, SEEK_END);
             fread(&id, intSize, 1, departmentsDelFile);
             while (id == -1)
@@ -201,12 +203,12 @@ int insertS() {
     FILE* departmentsFile;
     Employee employee;
     Department department;
-    double departmentStructSize = sizeof(Department);
+    int departmentStructSize = sizeof(Department);
     if ((employeesFile = fopen(EMPLOYEE_PATH, "a+b")) == NULL) {
         perror("Error. Problems with opening the file");
         return 1;
     }
-    if ((departmentsFile = fopen(OFFICE_PATH, "r+b")) == NULL) {
+    if ((departmentsFile = fopen(DEPARTMENT_PATH, "r+b")) == NULL) {
         perror("Error. Problems with opening the file");
         return 1;
     }
@@ -214,7 +216,7 @@ int insertS() {
     while (fread(&employee, sizeof(struct Employee), 1, employeesFile) == 1);
     if (employee.id >= 1)
     {
-        employee.id = employee.id++;
+        employee.id++;
     }
     else
     {
@@ -228,9 +230,11 @@ int insertS() {
     printf("Enter Employee Speciality: ");
     scanf("%s", employee.speciality);
     printf("\n");
-    employee.isDeleted = false;
+   
     fseek(departmentsFile, departmentStructSize*(employee.departmentID-1), SEEK_SET);
     fread(&department, departmentStructSize, 1, departmentsFile);
+    employee.isDeleted = false;
+   
     for (int i = 0; i < department.departmentEmployeesSize; i++)
     {
       
@@ -240,6 +244,8 @@ int insertS() {
             department.currentCountOfEmployees++;
             if (department.currentCountOfEmployees<department.departmentEmployeesSize)
             {
+             
+            
                 fseek(departmentsFile, departmentStructSize * (employee.departmentID - 1), SEEK_SET);
                 fwrite(&department, departmentStructSize, 1, departmentsFile);
             }
@@ -262,7 +268,7 @@ int printAllMasters() {
     FILE* departmentsFile;
     Department department;
 
-    if ((departmentsFile = fopen(OFFICE_PATH, "rb")) == NULL) 
+    if ((departmentsFile = fopen(DEPARTMENT_PATH, "rb")) == NULL) 
     {
         perror("Error occured while opening file");
         return 1;
@@ -301,7 +307,8 @@ int printAllSlaves()
       
         if (!employee.isDeleted)
         {
-            printf("ID: %d\Department ID  : %d\nEmployee Name       : %s\nEmployee Speciality : %s\n", employee.id, employee.departmentID, employee.name, employee.speciality);
+            printf("ID                  : %d\nDepartment ID       : %d\nEmployee Name       : %s\nEmployee Speciality : %s\n",
+            employee.id, employee.departmentID, employee.name, employee.speciality);
             printf("%s", "-----------------------------\n");
         }
        
@@ -316,7 +323,7 @@ int countM() {
     Department department;
     int count = 0;
     double departmentStructSize = sizeof(Department);
-    if ((departmentsFile = fopen(OFFICE_PATH, "rb")) == NULL)
+    if ((departmentsFile = fopen(DEPARTMENT_PATH, "rb")) == NULL)
     {
         perror("Error occured while opening file");
         return 1;
@@ -379,12 +386,12 @@ int deleteMasterByID(int id)
     int bufferId;
     Department department;
 
-    if ((departmentFile = fopen(OFFICE_PATH, "r+b")) == NULL) 
+    if ((departmentFile = fopen(DEPARTMENT_PATH, "r+b")) == NULL) 
     {
         perror("Error. Problems with opening the file");
         return 1;
     }
-    if ((departmentsDelFile = fopen(OFFICE_DELETED, "a+b")) == NULL)
+    if ((departmentsDelFile = fopen(DEPARTMENTS_DELETED, "a+b")) == NULL)
     {
         perror("Error. Problems with opening the file");
         return 1;
@@ -451,7 +458,7 @@ int masterUpdateByID(int id)
     int property;
     int isFound = 0;
 
-    if ((departmentFile = fopen(OFFICE_PATH, "r+b")) == NULL) {
+    if ((departmentFile = fopen(DEPARTMENT_PATH, "r+b")) == NULL) {
         perror("Error occured while opening file\n");
         return 1;
     }
@@ -509,7 +516,7 @@ int slaveUpdateByID(int id) {
         perror("Error. Problems with opening the file");
         return 1;
     }
-    if ((departmentsFile = fopen(OFFICE_PATH, "r+b")) == NULL)
+    if ((departmentsFile = fopen(DEPARTMENT_PATH, "r+b")) == NULL)
     {
         perror("Error. Problems with opening the file");
         return 1;
@@ -605,7 +612,7 @@ int mastersShow() {
     FILE* departmentsFile;
     Department department;
 
-    if ((departmentsFile = fopen(OFFICE_PATH, "rb")) == NULL) 
+    if ((departmentsFile = fopen(DEPARTMENT_PATH, "rb")) == NULL) 
     {
         perror("Error. Problems with opening the file");
         return 1;
