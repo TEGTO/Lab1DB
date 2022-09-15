@@ -9,19 +9,19 @@
 #define OFFICE_PATH ("office")
 #define OFFICE_DELETED ("office_deleted")
 
-struct Office {
+struct Department {
     int id;
-    char department[SIZE];
+    char departmentName[SIZE];
     char director[SIZE];
     char project[SIZE];
-    int departmentSize = 255;
-    int employees_id[SIZE]{};
+    int departmentEmployeesSize = 255;
+    int employeesID[SIZE]{};
     int currentCountOfEmployees = 0;
     bool isDeleted = false;
 };
 
 struct Employee {
-    int officeID;
+    int departmentID;
     int id;
     char name[SIZE];
     char speciality[SIZE];
@@ -60,7 +60,7 @@ int masterUpdateByID(int id);
 
 int slaveUpdateByID(int id);
 
-void officePropPrint(struct Office* office);
+void departmentPropPrint(struct Department* office);
 
 void employeePropPrint(struct Employee* employee);
 
