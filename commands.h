@@ -4,25 +4,31 @@
 #include <stdlib.h>
 
 #define SIZE (255)
-#define EMPLOYEE_PATH ("employee")
-#define EMPLOYEE_DELETED ("employee_deleted")
+#define EMPLOYEE_PATH ("employees")
+#define DELETEDEL_PATH ("deleted_el")
 #define DEPARTMENT_PATH ("departments")
 #define DEPARTMENTS_DELETED ("departments_deleted")
-
+struct DeletedElements
+{
+    int deletedDepartmentID[200]{};
+    int sizeDeletedDepartment=0;
+    int deletedEmployeesID[200]{};
+    int sizeDeletedEmployees = 0;
+};
 struct Department {
     int id;
     char departmentName[SIZE];
     char director[SIZE];
     char project[SIZE];
-    int departmentEmployeesSize = 255;
-    int employeesID[SIZE]{};
-    int currentCountOfEmployees = 0;
+    int firstEmployeeId=0;
     bool isDeleted = false;
 };
 
 struct Employee {
     int departmentID;
     int id;
+    int nextEmployeeID=0;
+    int prevEmpoyeeID=0;
     char name[SIZE];
     char speciality[SIZE];
     bool isDeleted = false;
@@ -32,17 +38,17 @@ int getM();
 
 int getS();
 
-void delM();
+void delM(DeletedElements& delEl);
 
-void delS();
+void delS(DeletedElements& delEl);
 
 int mUpdate();
 
 int sUpdate();
 
-int insertM();
+int insertM(DeletedElements& delEl);
 
-int insertS();
+int insertS(DeletedElements& delEl);
 
 int printAllMasters();
 
@@ -52,9 +58,9 @@ int countM();
 
 int countS();
 
-int deleteMasterByID(int id);
+int deleteMasterByID(int id, DeletedElements& delEl);
 
-int deleteSlaveByID(int id);
+int deleteSlaveByID(int id, DeletedElements& delEl);
 
 int masterUpdateByID(int id);
 

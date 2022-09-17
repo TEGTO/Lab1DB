@@ -19,10 +19,33 @@ void commands() {
 
     printf("Enter: ");
 }
+void readDelFile(DeletedElements& delEl)
+{
+    FILE* delElFile;
+    if ((delElFile = fopen(DELETEDEL_PATH, "a+b")) == NULL) {
+        perror("Error. Problems with opening the file");
 
+    }
+    fread(&delEl, sizeof(struct DeletedElements), 1, delElFile);
+    remove(DELETEDEL_PATH);
+    fclose(delElFile);
+}
+void saveDelFile(DeletedElements& delEl)
+{
+    FILE* delElFile;
+    if ((delElFile = fopen(DELETEDEL_PATH, "a+b")) == NULL) {
+        perror("Error. Problems with opening the file");
+
+    }
+    fwrite(&delEl, sizeof(struct DeletedElements), 1, delElFile);
+    fclose(delElFile);
+}
 void menu() {
     int action;
     bool check = true;
+    DeletedElements delEl;
+    readDelFile(delEl);
+    
     while (check) 
     {
         commands();
@@ -36,10 +59,10 @@ void menu() {
             getS();
             break;
         case 3:
-            delM();
+            delM(delEl);
             break;
         case 4:
-            delS();
+            delS(delEl);
             break;
         case 5:
             mUpdate();
@@ -48,10 +71,10 @@ void menu() {
             sUpdate();
             break;
         case 7:
-            insertM();
+            insertM(delEl);
             break;
         case 8:
-            insertS();
+            insertS(delEl);
             break;
         case 9:
             countM();
@@ -67,6 +90,7 @@ void menu() {
             break;
         case 13:
             check != check;
+            saveDelFile(delEl);
             exit(0);
             break;
         default:
