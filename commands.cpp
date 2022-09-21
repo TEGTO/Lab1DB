@@ -61,22 +61,25 @@ int getS() {
         return 1;
     }
     printf("%s", "\n------------Department Employees------------\n");
-    
-    fseek(employees, sizeof(struct Employee) * (department.firstEmployeeId- 1), SEEK_SET);
-    fread(&employee, sizeof(struct Employee), 1, employees);
-            if (!employee.isDeleted&& employee.departmentID == department.id )
-            {
-              
-                printf("ID           : %d\nDepartmentID : %d\nName         : %s\nSpeciality   : %s\n",employee.id,employee.departmentID, employee.name, employee.speciality);
-                printf("%s", "--------------------------------------------\n");
-            }
-            while (employee.nextEmployeeID != 0)
-            {
-                fseek(employees, sizeof(struct Employee) * (employee.nextEmployeeID - 1), SEEK_SET);
-                fread(&employee, sizeof(struct Employee), 1, employees);
-                printf("ID           : %d\nDepartmentID : %d\nName         : %s\nSpeciality   : %s\n", employee.id, employee.departmentID, employee.name, employee.speciality);
-                printf("%s", "--------------------------------------------\n");
-            }
+    if (department.firstEmployeeId!=0)
+    {
+        fseek(employees, sizeof(struct Employee) * (department.firstEmployeeId - 1), SEEK_SET);
+        fread(&employee, sizeof(struct Employee), 1, employees);
+        if (!employee.isDeleted && employee.departmentID == department.id)
+        {
+
+            printf("ID           : %d\nDepartmentID : %d\nName         : %s\nSpeciality   : %s\n", employee.id, employee.departmentID, employee.name, employee.speciality);
+            printf("%s", "--------------------------------------------\n");
+        }
+        while (employee.nextEmployeeID != 0)
+        {
+            fseek(employees, sizeof(struct Employee) * (employee.nextEmployeeID - 1), SEEK_SET);
+            fread(&employee, sizeof(struct Employee), 1, employees);
+            printf("ID           : %d\nDepartmentID : %d\nName         : %s\nSpeciality   : %s\n", employee.id, employee.departmentID, employee.name, employee.speciality);
+            printf("%s", "--------------------------------------------\n");
+        }
+    }
+           
         
    
  
@@ -151,15 +154,16 @@ int insertM(DeletedElements & delEl) {
     
     if (id!=-1) 
     {
+            fclose(departmentsFile);
             departmentsFile = fopen(DEPARTMENT_PATH, "r+b");
                
             department.id = id;
-            department.isDeleted = false;
-          
-            fseek(departmentsFile, sizeof(struct Department) * (id - 1), SEEK_SET);
-            id = -1;
          
-            
+          
+            fseek(departmentsFile, sizeof(struct Department) * (department.id - 1), SEEK_SET);
+            id = -1;
+            fread(&department, sizeof(struct Department), 1, departmentsFile);
+           
                
         
     }
@@ -187,7 +191,14 @@ int insertM(DeletedElements & delEl) {
     {
         department.firstEmployeeId = 0;
     }
-  
+    else
+    {
+        fseek(departmentsFile, sizeof(struct Department) * (department.id - 1), SEEK_SET);
+        department.isDeleted = false;
+        fwrite(&department, sizeof(struct Department), 1, departmentsFile);
+        fclose(departmentsFile);
+        return 0;
+    }
     department.isDeleted = false;
     fwrite(&department, sizeof(struct Department), 1, departmentsFile);
     fclose(departmentsFile);
@@ -396,11 +407,17 @@ int countS() {
     printf("Enter the Department ID or -1 for count all employees:\n");
     scanf("%d", &id);
     printf("\n");
+    int check=-1;
     while (fread(&employee, sizeof(struct Employee), 1, employeesFile) == 1) 
     {
         if (!employee.isDeleted)
         {
-            if (id == -1 || employee.departmentID == id) count++;
+            if (check!=employee.id)
+            {
+                if (id == -1 || employee.departmentID == id) count++;
+                check = employee.id;
+            }
+           
         }
        
     }
@@ -430,7 +447,7 @@ int deleteMasterByID(int id, DeletedElements& delEl)
     double departmentStructSize = sizeof(Department);
     if (department.id == id )
     {
-        fseek(departmentFile, -departmentStructSize, SEEK_CUR);
+        fseek(departmentFile, sizeof(struct Department) * (id - 1), SEEK_SET);
         
         department.isDeleted = true;
         //department.firstEmployeeId = 0; if we don't wanna move employees to new department
@@ -688,7 +705,7 @@ int slaveUpdateByID(int id) {
             bufferEmployee.prevEmpoyeeID = employee.id;
             fwrite(&employee, sizeof(struct Employee), 1, employeesFile);
         }
-       
+      
 
         break;
     case 2:
