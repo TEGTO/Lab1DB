@@ -533,6 +533,7 @@ int deleteSlaveByID(int id, DeletedElements& delEl)
             fseek(employeesFile, sizeof(struct Employee) * (nextID - 1), SEEK_SET);
             fread(&employee, sizeof(struct Employee), 1, employeesFile);
             employee.prevEmpoyeeID = prevID;
+            fseek(employeesFile, sizeof(struct Employee) * (nextID - 1), SEEK_SET);
             fwrite(&employee, sizeof(struct Employee), 1, employeesFile);
         }
         
