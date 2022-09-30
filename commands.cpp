@@ -636,9 +636,11 @@ int slaveUpdateByID(int id) {
     scanf("%d", &property);
  
     Employee bufferEmployee;
+    bufferEmployee = employee;
     int oldDepartmentID = employee.departmentID;
     int prevEmployeeId = employee.prevEmpoyeeID;
     int nextEmployeeId = employee.nextEmployeeID;
+
     switch (property) 
     {
     case 1:
